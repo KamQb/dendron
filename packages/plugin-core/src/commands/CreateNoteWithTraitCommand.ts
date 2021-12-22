@@ -1,5 +1,4 @@
 import {
-  ConfigUtils,
   DendronError,
   DVault,
   NoteTrait,
@@ -14,15 +13,15 @@ import {
   LookupControllerV3CreateOpts,
 } from "../components/lookup/LookupControllerV3";
 import { NoteLookupProvider } from "../components/lookup/LookupProviderV3";
-import { VaultSelectionMode } from "../components/lookup/types";
 import {
   NoteLookupProviderUtils,
   PickerUtilsV2,
 } from "../components/lookup/utils";
 import { VSCodeUtils } from "../vsCodeUtils";
-import { getDWorkspace, getExtension } from "../workspace";
+import { getExtension } from "../workspace";
 import { BaseCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
+import { VaultSelectionModeKeeper } from "../components/lookup/vaultSelectionModeKeeper";
 
 export type CommandOpts = {
   fname: string;
@@ -114,17 +113,11 @@ export class CreateNoteWithTraitCommand extends BaseCommand<
       title = this.trait.OnCreate.setTitle(context);
     }
 
-    const config = getDWorkspace().config;
-    const confirmVaultOnCreate =
-      ConfigUtils.getCommands(config).lookup.note.confirmVaultOnCreate;
-
     // TODO: GoToNoteCommand() needs to have its arg behavior fixed, and then
     // this vault logic can be deferred there.
     let vault = opts.vaultOverride;
     if (!opts.vaultOverride) {
-      const selectionMode = confirmVaultOnCreate
-        ? VaultSelectionMode.alwaysPrompt
-        : VaultSelectionMode.smart;
+      const selectionMode = VaultSelectionModeKeeper.getVaultSelectionMode();
 
       const currentVault = PickerUtilsV2.getVaultForOpenEditor();
       const selectedVault = await PickerUtilsV2.getOrPromptVaultForNewNote({

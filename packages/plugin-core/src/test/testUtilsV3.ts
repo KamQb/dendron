@@ -64,6 +64,8 @@ import {
   stubWorkspaceFile,
   stubWorkspaceFolders,
 } from "./testUtilsv2";
+import { VaultSelectionModeKeeper } from "../components/lookup/vaultSelectionModeKeeper";
+import { VaultSelectionMode } from "../components/lookup/types";
 
 const TIMEOUT = 60 * 1000 * 5;
 
@@ -292,6 +294,7 @@ export async function runLegacyMultiWorkspaceTest(
   const { wsRoot, vaults } = await setupLegacyWorkspaceMulti(opts);
   await _activate(opts.ctx);
   const engine = getDWorkspace().engine;
+  VaultSelectionModeKeeper.recordDeviationFromConfig(VaultSelectionMode.auto);
   await opts.onInit({ wsRoot, vaults, engine });
 
   cleanupVSCodeContextSubscriptions(opts.ctx);
@@ -464,6 +467,9 @@ export function describeMultiWS(
     before(async () => {
       await setupLegacyWorkspaceMulti(opts);
       await _activate(opts.ctx);
+      VaultSelectionModeKeeper.recordDeviationFromConfig(
+        VaultSelectionMode.auto
+      );
     });
 
     fn();
