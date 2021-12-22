@@ -32,6 +32,7 @@ import * as vscode from "vscode";
 import { Uri } from "vscode";
 import { PreviewPanelFactory } from "./components/views/PreviewViewFactory";
 import {
+  DENDRON_COMMANDS,
   DendronContext,
   extensionQualifiedId,
   GLOBAL_STATE,
@@ -49,7 +50,7 @@ import {
   NoteTraitService,
 } from "./services/NoteTraitService";
 import { UserDefinedTraitV1 } from "./traits/UserDefinedTraitV1";
-import { CodeConfigKeys } from "./types";
+import { BacklinkSortOrder, CodeConfigKeys } from "./types";
 import { DisposableStore, resolvePath } from "./utils";
 import { sentryReportingCallback } from "./utils/analytics";
 import { CalendarView } from "./views/CalendarView";
@@ -592,7 +593,23 @@ export class DendronExtension {
     getExtension().backlinksDataProvider = backlinksTreeDataProvider;
 
     vscode.commands.registerCommand(
-      "dendron.backlinks.expandAll",
+      DENDRON_COMMANDS.BACKLINK_SORT_BY_LAST_UPDATED.key,
+      sentryReportingCallback(() => {
+        backlinksTreeDataProvider.updateSortOrder(
+          BacklinkSortOrder.LastUpdated
+        );
+      })
+    );
+
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.BACKLINK_SORT_BY_PATH_NAMES.key,
+      sentryReportingCallback(() => {
+        backlinksTreeDataProvider.updateSortOrder(BacklinkSortOrder.PathNames);
+      })
+    );
+
+    vscode.commands.registerCommand(
+      DENDRON_COMMANDS.BACKLINK_EXPAND_ALL.key,
       sentryReportingCallback(async () => {
         function expand(backlink: Backlink) {
           backlinkTreeView.reveal(backlink, {
